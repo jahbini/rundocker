@@ -1,0 +1,152 @@
+networks:
+  iotstack_nw: # Exposed by your host.
+    # external: true
+    name: IOTstack_Net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.77.60.0/24
+          # - gateway: 10.77.60.1
+
+  iotstack_nw_infernal: # For interservice communication. No access to outside
+    name: IOTstack_Net_Infernal
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.77.72.0/24
+          # - gateway: 10.77.72.1
+
+  iotstack_nw_internal: # For interservice communication. No access to outside
+    name: IOTstack_Net_Internal
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.77.76.0/24
+          # - gateway: 10.77.76.1
+
+  vpn_nw: # Network specifically for VPN
+    name: IOTstack_VPN
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.77.88.0/24
+          # - gateway: 192.18.200.1
+
+  # default:
+  #   external: true
+  #   name: iotstack_nw
+
+  # hosts_nw:
+  #   driver: hosts
+
+services:
+
+  celarien:
+    container_name: celarien
+    image: jahbini/celarien:sqlite
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VIRTUAL_PORT=3000
+      - VIRTUAL_HOST=celarien.com
+      - LETSENCRYPT_HOST=celarien.com
+      - DATABASE_URL=file://app/build/client/images/likielike.db
+    volumes:
+      - ./volumes/celarien:/app/build/client/images
+    networks:
+      - iotstack_nw_internal
+
+  space-struts:
+    container_name: space-struts
+    image: jahbini/spacestruts:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VIRTUAL_PORT=3000
+      - VIRTUAL_HOST=spacestruts.com
+      - LETSENCRYPT_HOST=spacestruts.com
+    volumes:
+      - ./volumes/space-struts:/app/build/client/images
+    networks:
+      - iotstack_nw_infernal
+
+  letsencrypt-nginx-proxy-companion:
+    restart: unless-stopped
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.13.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "./volumes/nginx/htpasswd:/etc/nginx/htpasswd/"
+      - "./volumes/nginx/html:/usr/share/nginx/html"
+      - "./volumes/nginx/vhost.d:/etc/nginx/vhost.d"
+      - "./volumes/nginx/certs:/etc/nginx/certs"
+      - ./volumes/letsencrypt/acme.sh:/etc/acme.sh
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy:latest
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - iotstack_nw
+      - iotstack_nw_infernal
+      - iotstack_nw_internal
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./volumes/nginx/htpasswd:/etc/nginx/htpasswd/"
+      - "./volumes/nginx/html:/usr/share/nginx/html"
+      - "./volumes/nginx/vhost.d:/etc/nginx/vhost.d"
+      - "./volumes/nginx/certs:/etc/nginx/certs"
+      - ./volumes/letsencrypt/acme.sh:/etc/acme.sh
+
+  portainer-ce:
+    container_name: portainer-ce
+    image: portainer/portainer-ce
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./volumes/portainer-ce/data:/data
+    environment:
+      - VIRTUAL_HOST=portainer.bamboojim.com
+      - LETSENCRYPT_HOST=portainer.bamboojim.com
+      - VIRTUAL_PORT=9000
+    networks:
+      - iotstack_nw_internal
+      - iotstack_nw_infernal
+
+#  surv:
+#  container_name: coder
+#    image: codercom/code-server:latest
+#    restart: unless-stopped
+#    environment:
+#      - DOCKER_USER="mar1on"
+#      - VIRTUAL_PORT=2902
+#      - VIRTUAL_HOST=surv.bamboojim.com
+#      - LETSENCRYPT_HOST=surv.bamboojim.com
+#    volumes:
+#      - /home/mar1on/coder-config:/home/coder/.config
+#      - /home/mar1on/development:/home/coder/project
+#    ports:
+#      - 2902:2902
+#    command:
+#      - "/usr/bin/entrypoint.sh"
+#      - "--bind-addr"
+#      - "0.0.0.0:2902"
+#    networks:
+#    - iotstack_nw_internal
+#    - iotstack_nw
+
