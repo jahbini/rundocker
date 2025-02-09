@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Set error handling
+set -e
+
+# Define deployment directory
+DEPLOY_DIR=~/rundocker
+
+# Navigate to deployment directory
+cd "$DEPLOY_DIR"
+
+# Find the `old` image ID
+OLD_IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep "jahbini/celarien:old" | awk '{print $2}')
+
+if [ -z "$OLD_IMAGE_ID" ]; then
+    echo "❌ No old image found. Rollback aborted."
+    exit 1
+fi
+
+# Remove the `latest` tag
+docker rmi jahbini/celarien:latest || true
+
+# Tag `old` back to `latest`
+echo "🔄 Rolling back to previous version..."
+docker tag jahbini/celarien:old jahbini/celarien:latest
+
+# Restart the container using docker-compose
+echo "🔄 Restarting container..."
+docker-compose down celarien
+docker-compose up -d celarien
+
+echo "✅ Rollback successful! Running the previous image."

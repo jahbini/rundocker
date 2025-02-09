@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Set error handling
+set -e
+
+# Define directories
+BUILD_DIR=~/celarien
+DEPLOY_DIR=~/rundocker
+
+# Navigate to build directory and build the new image
+echo "🚀 Building new Docker image..."
+cd "$BUILD_DIR"
+docker build -t jahbini/celarien:test .
+
+# Navigate to deployment directory
+cd "$DEPLOY_DIR"
+
+# Find the current `latest` image ID
+OLD_IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep "jahbini/celarien:latest" | awk '{print $2}')
+
+# If there is an old image, rename it to `old`
+if [ -n "$OLD_IMAGE_ID" ]; then
+    echo "🔄 Saving current `latest` as `old`..."
+    docker tag "$OLD_IMAGE_ID" jahbini/celarien:old
+fi
+
+# Remove the `latest` tag
+docker rmi jahbini/celarien:latest || true
+
+# Tag the `test` image as `latest`
+echo "🚀 Promoting test image to latest..."
+docker tag jahbini/celarien:test jahbini/celarien:latest
+
+# Restart the container using docker-compose
+echo "🔄 Restarting container..."
+docker-compose down celarien
+docker-compose up -d celarien
+
+echo "✅ Deployment successful! Running the new image."
