@@ -36,4 +36,4 @@ echo "🔄 Restarting container..."
 docker-compose down celarien
 docker-compose up -d celarien
 
-echo "✅ Deployment successful! Running the new `mysql` image."
+echo "✅ Deployment successful! Running the new mysql image."
