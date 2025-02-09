@@ -17,16 +17,16 @@ if [ -z "$OLD_IMAGE_ID" ]; then
     exit 1
 fi
 
-# Remove the `latest` tag
-docker rmi jahbini/celarien:latest || true
+# Remove the `mysql` tag
+docker rmi jahbini/celarien:mysql || true
 
-# Tag `old` back to `latest`
-echo "🔄 Rolling back to previous version..."
-docker tag jahbini/celarien:old jahbini/celarien:latest
+# Tag `old` back to `mysql`
+echo "🔄 Rolling back to previous `mysql` version..."
+docker tag jahbini/celarien:old jahbini/celarien:mysql
 
 # Restart the container using docker-compose
 echo "🔄 Restarting container..."
 docker-compose down celarien
 docker-compose up -d celarien
 
-echo "✅ Rollback successful! Running the previous image."
+echo "✅ Rollback successful! Running the previous `mysql` image."
