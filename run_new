@@ -15,25 +15,25 @@ docker build -t jahbini/celarien:test .
 # Navigate to deployment directory
 cd "$DEPLOY_DIR"
 
-# Find the current `mysql` image ID
-OLD_IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep "jahbini/celarien:mysql" | awk '{print $2}')
+# Find the current `sqlite` image ID
+OLD_IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep "jahbini/celarien:sqlite" | awk '{print $2}')
 
 # If there is an old image, rename it to `old`
 if [ -n "$OLD_IMAGE_ID" ]; then
-    echo "🔄 Saving current `mysql` image as `old`..."
+    echo "🔄 Saving current `sqlite` image as `old`..."
     docker tag "$OLD_IMAGE_ID" jahbini/celarien:old
 fi
 
-# Remove the `mysql` tag (does NOT remove the image)
-docker rmi jahbini/celarien:mysql || true
+# Remove the `sqlite` tag (does NOT remove the image)
+docker rmi jahbini/celarien:sqlite || true
 
-# Tag the `test` image as `mysql`
-echo "🚀 Promoting test image to mysql..."
-docker tag jahbini/celarien:test jahbini/celarien:mysql
+# Tag the `test` image as `sqlite`
+echo "🚀 Promoting test image to sqlite..."
+docker tag jahbini/celarien:test jahbini/celarien:sqlite
 
 # Restart the container using docker-compose
 echo "🔄 Restarting container..."
 docker-compose down celarien
 docker-compose up -d celarien
 
-echo "✅ Deployment successful! Running the new mysql image."
+echo "✅ Deployment successful! Running the new sqlite image."

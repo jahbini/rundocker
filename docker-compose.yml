@@ -59,7 +59,7 @@ services:
       - LETSENCRYPT_HOST=celarien.com
       - DATABASE_URL=file://app/build/client/images/likielike.db
     volumes:
-      - ./volumes/celarien:/app/build/client/images
+      - $HOME/volumes/celarien:/app/build/client/images
     networks:
       - iotstack_nw_internal
 
@@ -74,7 +74,7 @@ services:
       - VIRTUAL_HOST=spacestruts.com
       - LETSENCRYPT_HOST=spacestruts.com
     volumes:
-      - ./volumes/space-struts:/app/build/client/images
+      - $HOME/volumes/space-struts:/app/build/client/images
     networks:
       - iotstack_nw_infernal
 
@@ -83,11 +83,11 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion:v1.13.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - "./volumes/nginx/htpasswd:/etc/nginx/htpasswd/"
-      - "./volumes/nginx/html:/usr/share/nginx/html"
-      - "./volumes/nginx/vhost.d:/etc/nginx/vhost.d"
-      - "./volumes/nginx/certs:/etc/nginx/certs"
-      - ./volumes/letsencrypt/acme.sh:/etc/acme.sh
+      - "$HOME/volumes/nginx/htpasswd:/etc/nginx/htpasswd/"
+      - "$HOME/volumes/nginx/html:/usr/share/nginx/html"
+      - "$HOME/volumes/nginx/vhost.d:/etc/nginx/vhost.d"
+      - "$HOME/volumes/nginx/certs:/etc/nginx/certs"
+      - $HOME/volumes/letsencrypt/acme.sh:/etc/acme.sh
     environment:
       - NGINX_PROXY_CONTAINER=nginx-proxy
 
@@ -104,29 +104,11 @@ services:
       - iotstack_nw_internal
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
-      - "./volumes/nginx/htpasswd:/etc/nginx/htpasswd/"
-      - "./volumes/nginx/html:/usr/share/nginx/html"
-      - "./volumes/nginx/vhost.d:/etc/nginx/vhost.d"
-      - "./volumes/nginx/certs:/etc/nginx/certs"
-      - ./volumes/letsencrypt/acme.sh:/etc/acme.sh
-
-  portainer-ce:
-    container_name: portainer-ce
-    image: portainer/portainer-ce
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-      - "9000:9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./volumes/portainer-ce/data:/data
-    environment:
-      - VIRTUAL_HOST=portainer.bamboojim.com
-      - LETSENCRYPT_HOST=portainer.bamboojim.com
-      - VIRTUAL_PORT=9000
-    networks:
-      - iotstack_nw_internal
-      - iotstack_nw_infernal
+      - "$HOME/volumes/nginx/htpasswd:/etc/nginx/htpasswd/"
+      - "$HOME/volumes/nginx/html:/usr/share/nginx/html"
+      - "$HOME/volumes/nginx/vhost.d:/etc/nginx/vhost.d"
+      - "$HOME/volumes/nginx/certs:/etc/nginx/certs"
+      - $HOME/volumes/letsencrypt/acme.sh:/etc/acme.sh
 
 #  surv:
 #  container_name: coder
