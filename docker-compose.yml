@@ -60,6 +60,7 @@ services:
       - DATABASE_URL=file://app/build/client/images/likielike.db
     volumes:
       - $HOME/volumes/celarien:/app/build/client/images
+      - $HOME/volumes/celarien_data:/data
     networks:
       - iotstack_nw_internal
 
@@ -75,6 +76,7 @@ services:
       - LETSENCRYPT_HOST=spacestruts.com
     volumes:
       - $HOME/volumes/space-struts:/app/build/client/images
+      - $HOME/volumes/space-struts:/data
     networks:
       - iotstack_nw_infernal
 

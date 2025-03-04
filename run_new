@@ -34,6 +34,6 @@ docker tag jahbini/celarien:test jahbini/celarien:sqlite
 # Restart the container using docker-compose
 echo "🔄 Restarting container..."
 docker-compose down celarien
-docker-compose up -d celarien
+docker-compose up -d 
 
 echo "✅ Deployment successful! Running the new sqlite image."
