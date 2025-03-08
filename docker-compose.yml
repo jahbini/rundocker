@@ -46,10 +46,10 @@ networks:
   #   driver: hosts
 
 services:
-
   celarien:
     container_name: celarien
     image: jahbini/celarien:sqlite
+    user: "${UID}:${GID}"
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -57,9 +57,9 @@ services:
       - VIRTUAL_PORT=3000
       - VIRTUAL_HOST=celarien.com
       - LETSENCRYPT_HOST=celarien.com
-      - DATABASE_URL=file://app/build/client/images/likielike.db
+      - DATABASE_URL=file:/data/likielike.db
+      - DEBUG=*
     volumes:
-      - $HOME/volumes/celarien:/app/build/client/images
       - $HOME/volumes/celarien_data:/data
     networks:
       - iotstack_nw_internal
@@ -68,6 +68,7 @@ services:
     container_name: space-struts
     image: jahbini/spacestruts:latest
     restart: unless-stopped
+    user: "${UID}:${GID}"
     ports:
       - "3000:3000"
     environment:
